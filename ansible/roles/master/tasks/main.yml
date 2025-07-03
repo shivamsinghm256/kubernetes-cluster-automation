@@ -1,0 +1,56 @@
+- name: Initialize Kubernetes Master
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create .kube directory for root
+  file:
+    path: /root/.kube
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Set up kubeconfig for root
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: yes
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_out
+  changed_when: false
+
+- name: Save join command for workers
+  copy:
+    dest: /tmp/join_command.sh
+    content: |
+      #!/bin/bash
+      {{ join_out.stdout }}
+    mode: '0700'
+
+- name: Adjust permissions on join_command.sh for worker fetch and execution
+  file:
+    path: /tmp/join_command.sh
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Fetch join command from master to local controller
+  fetch:
+    src: /tmp/join_command.sh
+    dest: ./join_command.sh
+    flat: yes
+
+- name: Apply Flannel CNI with retries
+  command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml --validate=false
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: flannel_apply
+  retries: 5
+  delay: 15
+  until: flannel_apply.rc == 0

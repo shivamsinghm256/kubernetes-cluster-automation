@@ -1,0 +1,46 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# SSH
+*.pem
+*.key
+
+# kubeconfig and sensitive files
+kubeconfig
+*.kubeconfig
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# Python cache (if you have helper scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Secrets and credentials
+secrets.yaml
+*.enc
+
+# Misc
+*.bak
+*.tmp

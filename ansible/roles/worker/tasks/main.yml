@@ -1,0 +1,10 @@
+- name: Copy join command from local to workers
+  copy:
+    src: ./join_command.sh   # on your Ansible controller (Mac)
+    dest: /tmp/join_command.sh
+    mode: '0700'
+
+- name: Join the cluster
+  command: sh /tmp/join_command.sh
+  args:
+    creates: /etc/kubernetes/kubelet.conf
